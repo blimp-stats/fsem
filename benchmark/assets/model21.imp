@@ -1,0 +1,18 @@
+DATA: data4.dat;
+VARIABLES: x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 z2 z1;
+MISSING: NA;
+LATENT:  alpha eta;
+MODEL:  
+    alpha ~~ eta;
+    x1 ~ intercept@mux1 alpha@1;
+    x2 ~ intercept@mux2 alpha@1 (x1 - (mux1 + alpha)) (y1 - (muy1 + eta));
+    x3 ~ intercept@mux3 alpha@1 (x2 - (mux2 + alpha)) (y2 - (muy2 + eta));
+    y1 ~ intercept@muy1 eta@1;
+    y2 ~ intercept@muy2 eta@1 (y1 - (muy1 + eta)) (x1 - (mux1 + alpha));
+    y3 ~ intercept@muy3 eta@1 (y2 - (muy2 + eta)) (x2 - (mux2 + alpha));
+    x1 ~~ y1;
+    x2 ~~ y2;
+    x3 ~~ y3;
+SEED: 90291;
+BURN: 20000;
+ITER: 40000;

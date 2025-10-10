@@ -1,0 +1,14 @@
+DATA: data1.dat;
+VARIABLES: y y_bin y_nom y_cnt y_2pt m1 m2 m_nom m_bin x1 x2 x3 x4 xs1 xs2 xs3 xs4 xc1 xc2 xc3 xc4;
+MISSING: NA;
+ORDINAL: m_bin xc1:xc4;
+LATENT: eta;
+MODEL:  
+    eta ~~ m_bin;
+    eta ~~ eta@1;
+    eta -> xc1@lo1 xc2:xc4;
+    xc3 ~~ xc4;
+    y ~ eta m_bin.latent;
+SEED: 90291;
+BURN: 20000;
+ITER: 40000;

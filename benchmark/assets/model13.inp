@@ -1,0 +1,21 @@
+! this file may not produce correct results if the binary m_bin is incomplete
+! if incomplete, the binary predictor m_bin must be treated as a latent response variable (categorical = ) or a normally distributed variable
+DATA: 
+  file = data2.dat;
+VARIABLE: 
+  names = y m_bin x1 x2 x3 x4;
+  usevariables =  y m_bin x1 x2 x3 x4;
+  ! categorical = m_bin; ! necessary latent response formulation with missing data
+ANALYSIS:
+  estimator = bayes;
+  bseed = 90291;
+  fbiterations = 40000;
+MODEL:
+  ! [m_bin$1]; ! necessary latent response formulation with missing data
+  alpha eta on m_bin;
+  alpha eta | x1@0 x2@1 x3@2 x4@3;
+  alpha with eta;
+  y on alpha eta m_bin;
+  x2^-x4^ pon x1^-x3^ (rho);
+OUTPUT: 
+  cinterval stdyx tech8;

@@ -1,0 +1,15 @@
+DATA: data2.dat;
+VARIABLES: y m_bin x1 x2 x3 x4;
+MISSING: NA;
+LATENT: alpha eta;
+MODEL:  
+    intercept m_bin -> alpha eta;
+    alpha ~~ eta;
+    x1 ~ intercept@alpha eta@0;
+    x2 ~ intercept@alpha eta@1 (x1 - alpha - 0*eta)@rho;
+    x3 ~ intercept@alpha eta@2 (x2 - alpha - 1*eta)@rho;
+    x4 ~ intercept@alpha eta@3 (x3 - alpha - 2*eta)@rho;
+    y ~ m_bin alpha eta;
+SEED: 90291;
+BURN: 20000;
+ITER: 40000;

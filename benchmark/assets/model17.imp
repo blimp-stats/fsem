@@ -1,0 +1,15 @@
+DATA: data3.dat;
+VARIABLES: l2id y x m_bin;
+MISSING: NA;
+NOMINAL: m_bin;
+CLUSTERID: l2id;
+LATENT: l2id = alpha eta;
+CENTER: groupmean = x;
+MODEL:  
+    alpha ~ intercept x.mean m_bin x.mean*m_bin;  
+    eta ~ intercept m_bin;  
+    alpha ~~ eta;
+    y ~ intercept@alpha x@eta;
+SEED: 90291;
+BURN: 10000;
+ITER: 20000;

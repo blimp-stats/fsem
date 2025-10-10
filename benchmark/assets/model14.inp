@@ -1,0 +1,16 @@
+DATA: 
+  file = data1.dat;
+VARIABLE: 
+  names = y y_bin y_nom y_cnt m1 m2 m_nom m_bin 
+    x1 x2 x3 x4 xs1 xs2 xs3 xs4 xc1 xc2 xc3 xc4;
+  usevariables = y m_bin xsum;
+DEFINE:
+  xsum = xc1 + xc2 + xc3 + xc4;
+ANALYSIS:
+  estimator = bayes;
+  bseed = 90291;
+  fbiterations = 20000;
+MODEL:
+  y on xsum m_bin;
+OUTPUT: 
+  cinterval stdyx tech8;

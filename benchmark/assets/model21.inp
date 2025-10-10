@@ -1,0 +1,18 @@
+DATA:       
+  file = data4.dat;
+VARIABLE:   
+  NAMES = x1-x5 y1-y5 z2 z1;
+  USEVARIABLES = x1-x3 y1-y3;
+ANALYSIS:   
+  estimator = bayes;
+  fbiterations = 40000;
+  bseed = 90291;
+MODEL:
+  alpha BY x1-x3@1;
+  eta BY y1-y3@1;
+  alpha WITH eta;
+  x2^-x3^ y2^-y3^ PON x1^-x2^ y1^-y2^; ! Autoregressive effects
+  x2^-x3^ y2^-y3^ PON y1^-y2^ x1^-x2^; ! Cross-lagged effects
+  x1^-x3^ PWITH y1^-y3^;         
+OUTPUT: 
+  cinterval stdyx tech8;

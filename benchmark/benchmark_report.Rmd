@@ -1,0 +1,605 @@
+---
+title: "FSEM Software Benchmark Comparison"
+subtitle: "Blimp vs. blavaan vs. Mplus (Bayes)"
+author: "Automated Benchmark Report"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    code_folding: hide
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 6)
+library(microbenchmark)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# Define colorblind-friendly palette (Okabe-Ito)
+cb_palette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+software_colors <- c("blimp" = "#0072B2", "mplus" = "#E69F00", "blavaan" = "#009E73")
+```
+
+# Executive Summary
+
+This report presents benchmark timing results comparing three Bayesian structural equation modeling software packages:
+
+- **Blimp** (via rblimp)
+- **blavaan** (Bayesian lavaan)
+- **Mplus** (Bayes estimator, via MplusAutomation)
+
+```{r load-data}
+# Load benchmark results
+results <- readRDS('benchmark_results.rds')
+
+# Extract session info from benchmark run
+benchmark_session_info <- attr(results, "session_info")
+benchmark_date <- attr(results, "benchmark_date")
+
+# Order results by model number
+model_order <- c("model1", "model2", "model3", "model5", "model6",
+                 "model13", "model14", "model17", "model20", "model21")
+results <- results[model_order[model_order %in% names(results)]]
+
+# Get number of replications from first model
+n_replications <- summary(results[[1]]) |> as.data.frame() |> subset(select = neval) |> unique() |> as.numeric()
+```
+
+Each model was estimated **`r n_replications` times** per software package using the `microbenchmark` package. All models used **2 processors** for parallel chain execution. MCMC settings vary by model complexity (see table below for details).
+
+```{r model-info}
+# Model information
+model_info <- data.frame(
+  model = c("Model 1", "Model 2", "Model 3", "Model 5", "Model 6",
+            "Model 13", "Model 14", "Model 17", "Model 20", "Model 21"),
+  description = c(
+    "Normal outcome, latent predictor",
+    "Normal outcome, latent mediator",
+    "Correlated latent/manifest predictors",
+    "Ordinal indicators, latent response variable",
+    "Multicategorical predictor, ordinal indicators",
+    "Growth model with AR(1) residuals",
+    "Sum score model",
+    "Two-level random slope model",
+    "Two-part outcome model",
+    "Random intercept cross-lagged panel (RI-CLPM)"
+  ),
+  blimp_mplus = c(
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=20000, 20000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=20000, 20000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=10000, 10000 per chain",
+    "2 chains, burn=20000, 20000 per chain"
+  ),
+  blavaan = c(
+    "2 chains, burn=500, 1000 per chain",
+    "2 chains, burn=500, 1000 per chain",
+    "2 chains, burn=500, 1000 per chain",
+    "2 chains, burn=500, 1000 per chain",
+    "2 chains, burn=500, 1000 per chain",
+    "—",
+    "2 chains, burn=500, 1000 per chain",
+    "—",
+    "2 chains, burn=500, 1000 per chain",
+    "—"
+  ),
+  software = c(
+    "Blimp, blavaan, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, Mplus",
+    "Blimp, blavaan, Mplus",
+    "Blimp, Mplus"
+  )
+)
+```
+
+## Model Summary
+
+```{r model-summary, dependson="model-info"}
+kable(model_info,
+      col.names = c("Model", "Description", "Blimp/Mplus MCMC", "blavaan MCMC", "Software Tested"),
+      caption = "Models included in benchmark comparison") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+# Summary of Results
+
+```{r summary-stats}
+# Create summary table
+summary_list <- lapply(names(results), function(model_name) {
+  result <- results[[model_name]]
+  summary_df <- summary(result)
+  summary_df$model <- model_name
+  return(summary_df)
+})
+
+summary_table <- do.call(rbind, summary_list)
+
+# Convert to data frame and ensure numeric columns (already in seconds)
+summary_table <- as.data.frame(summary_table)
+
+# Set factor levels to maintain order
+summary_table$model <- factor(summary_table$model, levels = names(results))
+
+# Get all models and software combinations to identify missing ones
+all_models <- unique(summary_table$model)
+all_software <- c("blimp", "mplus", "blavaan")
+
+# Create complete grid
+complete_grid <- expand.grid(
+  model = all_models,
+  expr = all_software,
+  stringsAsFactors = FALSE
+)
+
+# Create comprehensive table with speed ratios
+combined_stats <- summary_table %>%
+  select(model, expr, mean, median) %>%
+  mutate(
+    mean = as.numeric(mean),
+    median = as.numeric(median)
+  )
+
+# Merge with complete grid to add missing combinations
+combined_stats <- complete_grid %>%
+  left_join(combined_stats, by = c("model", "expr")) %>%
+  arrange(model, expr) %>%
+  group_by(model) %>%
+  mutate(
+    min_time = min(median, na.rm = TRUE),
+    ratio = ifelse(is.na(median), NA, median / min_time),
+    fastest = ifelse(!is.na(median) & median == min_time, "✓", "")
+  ) %>%
+  ungroup() %>%
+  mutate(
+    mean = ifelse(is.na(mean), "—", sprintf("%.2f", mean)),
+    median = ifelse(is.na(median), "—", sprintf("%.2f", median)),
+    ratio = ifelse(is.na(ratio), "—", sprintf("%.2f", ratio))
+  ) %>%
+  select(model, expr, mean, median, ratio, fastest)
+
+# Ensure ordering by model first, then software
+combined_stats$model <- factor(combined_stats$model, levels = names(results))
+combined_stats <- combined_stats %>% arrange(model, expr)
+
+kable(combined_stats,
+      col.names = c("Model", "Software", "Mean (s)", "Median (s)",
+                    "Ratio", "Fastest?"),
+      caption = paste("Timing statistics and speed ratios across", n_replications, "runs per software"),
+      align = c("l", "l", "r", "r", "r", "c"),
+      row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  collapse_rows(columns = 1, valign = "top") %>%
+  row_spec(which(combined_stats$model != dplyr::lag(combined_stats$model, default = factor(NA, levels = levels(combined_stats$model)))),
+           extra_css = "border-top: 2px solid #000;")
+```
+
+## Overall Performance Comparison
+
+```{r overall-comparison}
+# Calculate overall average performance across all models
+overall_performance <- summary_table %>%
+  mutate(
+    median = as.numeric(median),
+    mean = as.numeric(mean)
+  ) %>%
+  group_by(expr) %>%
+  summarize(
+    mean_median = mean(median),
+    mean_mean = mean(mean),
+    total_time = sum(median)
+  ) %>%
+  arrange(mean_median)
+
+kable(overall_performance,
+      col.names = c("Software", "Avg Median (s)", "Avg Mean (s)", "Total Time (s)"),
+      caption = "Overall performance across all models",
+      digits = 1) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+```
+
+## All Three Software Comparison (Common Models Only)
+
+```{r all-three-comparison, results='asis'}
+# Identify models where all three software packages were tested
+common_models_all3 <- summary_table %>%
+  group_by(model) %>%
+  summarize(n_software = n_distinct(expr)) %>%
+  filter(n_software == 3) %>%
+  pull(model)
+
+# Calculate average performance for models with all three software
+if (length(common_models_all3) > 0) {
+  overall_all3 <- summary_table %>%
+    filter(model %in% common_models_all3) %>%
+    mutate(median = as.numeric(median)) %>%
+    group_by(expr) %>%
+    summarize(
+      mean_median = mean(median),
+      n_models = n()
+    ) %>%
+    arrange(mean_median)
+}
+```
+
+**Models included (`r length(common_models_all3)`):** `r paste(common_models_all3, collapse = ", ")`
+
+```{r all-three-comparison-table}
+if (length(common_models_all3) > 0) {
+  kable(overall_all3,
+        col.names = c("Software", "Avg Median (s)", "N Models"),
+        caption = "Performance comparison for models all three packages can estimate",
+        digits = 1) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+}
+```
+
+## Blimp vs. Mplus (Common Models)
+
+```{r blimp-mplus-comparison}
+# Identify models where both Blimp and Mplus were tested
+common_models_blimp_mplus <- summary_table %>%
+  filter(expr %in% c("blimp", "mplus")) %>%
+  group_by(model) %>%
+  summarize(n_software = n_distinct(expr)) %>%
+  filter(n_software == 2) %>%
+  pull(model)
+
+# Calculate average performance
+if (length(common_models_blimp_mplus) > 0) {
+  overall_blimp_mplus <- summary_table %>%
+    filter(model %in% common_models_blimp_mplus, expr %in% c("blimp", "mplus")) %>%
+    mutate(median = as.numeric(median)) %>%
+    group_by(expr) %>%
+    summarize(
+      mean_median = mean(median),
+      n_models = n()
+    ) %>%
+    arrange(mean_median)
+}
+```
+
+**Models included (`r length(common_models_blimp_mplus)`):** `r paste(common_models_blimp_mplus, collapse = ", ")`
+
+```{r blimp-mplus-comparison-table}
+if (length(common_models_blimp_mplus) > 0) {
+  kable(overall_blimp_mplus,
+        col.names = c("Software", "Avg Median (s)", "N Models"),
+        caption = "Blimp vs. Mplus performance comparison",
+        digits = 1) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+}
+```
+
+## Blimp vs. blavaan (Common Models)
+
+```{r blimp-blavaan-comparison}
+# Identify models where both Blimp and blavaan were tested
+common_models_blimp_blavaan <- summary_table %>%
+  filter(expr %in% c("blimp", "blavaan")) %>%
+  group_by(model) %>%
+  summarize(n_software = n_distinct(expr)) %>%
+  filter(n_software == 2) %>%
+  pull(model)
+
+# Calculate average performance
+if (length(common_models_blimp_blavaan) > 0) {
+  overall_blimp_blavaan <- summary_table %>%
+    filter(model %in% common_models_blimp_blavaan, expr %in% c("blimp", "blavaan")) %>%
+    mutate(median = as.numeric(median)) %>%
+    group_by(expr) %>%
+    summarize(
+      mean_median = mean(median),
+      n_models = n()
+    ) %>%
+    arrange(mean_median)
+}
+```
+
+**Models included (`r length(common_models_blimp_blavaan)`):** `r paste(common_models_blimp_blavaan, collapse = ", ")`
+
+```{r blimp-blavaan-comparison-table}
+if (length(common_models_blimp_blavaan) > 0) {
+  kable(overall_blimp_blavaan,
+        col.names = c("Software", "Avg Median (s)", "N Models"),
+        caption = "Blimp vs. blavaan performance comparison",
+        digits = 1) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+}
+```
+
+# Visualizations
+
+## Boxplots by Model
+
+```{r boxplots, fig.height=10}
+# Create combined plot data
+plot_data_list <- lapply(names(results), function(model_name) {
+  result <- results[[model_name]]
+  df <- as.data.frame(result)
+  df$model <- model_name
+  df$time <- df$time / 1e9  # Convert nanoseconds to seconds
+  return(df)
+})
+
+plot_data <- do.call(rbind, plot_data_list)
+
+# Set factor levels to maintain order
+plot_data$model <- factor(plot_data$model, levels = names(results))
+
+# Create faceted boxplot
+ggplot(plot_data, aes(x = expr, y = time, fill = expr)) +
+  geom_boxplot() +
+  facet_wrap(~ model, scales = "free_y", ncol = 2) +
+  labs(
+    title = "Execution Time Distribution by Model and Software",
+    subtitle = paste("Each box represents", n_replications, "runs"),
+    x = "Software",
+    y = "Time (seconds)",
+    fill = "Software"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold")
+  ) +
+  scale_fill_manual(values = software_colors)
+```
+
+## Median Time Comparison Bar Chart
+
+```{r barplot, fig.height=8}
+median_plot_data <- summary_table %>%
+  mutate(median_seconds = as.numeric(median))
+
+# Ensure model is a factor with correct order
+median_plot_data$model <- factor(median_plot_data$model, levels = rev(names(results)))
+
+ggplot(median_plot_data, aes(x = model, y = median_seconds, fill = expr)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Median Execution Time by Model and Software",
+    x = "Model",
+    y = "Median Time (seconds)",
+    fill = "Software"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  ) +
+  scale_fill_manual(values = software_colors) +
+  coord_flip()
+```
+
+## Average Median Execution Time Across All Models
+
+```{r overall-barplot}
+ggplot(overall_performance, aes(x = reorder(expr, mean_median), y = mean_median, fill = expr)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Average Median Execution Time Across All Models",
+    x = "Software",
+    y = "Average Median Time (seconds)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = software_colors) +
+  coord_flip()
+```
+
+## All Three Software: Models in Common
+
+```{r all-three-barplot}
+if (length(common_models_all3) > 0) {
+  ggplot(overall_all3, aes(x = reorder(expr, mean_median), y = mean_median, fill = expr)) +
+    geom_bar(stat = "identity") +
+    labs(
+      title = "Average Median Time: Models All Three Can Estimate",
+      subtitle = paste(length(common_models_all3), "models"),
+      x = "Software",
+      y = "Average Median Time (seconds)"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = software_colors) +
+    coord_flip()
+}
+```
+
+## Blimp vs. Mplus: Models in Common
+
+```{r blimp-mplus-barplot}
+if (length(common_models_blimp_mplus) > 0) {
+  ggplot(overall_blimp_mplus, aes(x = reorder(expr, mean_median), y = mean_median, fill = expr)) +
+    geom_bar(stat = "identity") +
+    labs(
+      title = "Average Median Time: Blimp vs. Mplus",
+      subtitle = paste(length(common_models_blimp_mplus), "models"),
+      x = "Software",
+      y = "Average Median Time (seconds)"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = software_colors) +
+    coord_flip()
+}
+```
+
+## Blimp vs. blavaan: Models in Common
+
+```{r blimp-blavaan-barplot}
+if (length(common_models_blimp_blavaan) > 0) {
+  ggplot(overall_blimp_blavaan, aes(x = reorder(expr, mean_median), y = mean_median, fill = expr)) +
+    geom_bar(stat = "identity") +
+    labs(
+      title = "Average Median Time: Blimp vs. blavaan",
+      subtitle = paste(length(common_models_blimp_blavaan), "models"),
+      x = "Software",
+      y = "Average Median Time (seconds)"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = software_colors) +
+    coord_flip()
+}
+```
+
+# Model-Specific Details
+
+```{r model-details, results='asis'}
+for (model_name in names(results)) {
+  cat("\n##", toupper(model_name), "\n\n")
+
+  result <- results[[model_name]]
+
+  # Print summary
+  cat("### Summary Statistics\n\n")
+  print(kable(summary(result), digits = 2, caption = paste(model_name, "summary")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE))
+
+  # Create individual plot
+  cat("\n### Distribution Plot\n\n")
+  p <- autoplot(result, log = FALSE) +
+    labs(title = paste(model_name, "Execution Time")) +
+    theme_minimal()
+  print(p)
+
+  cat("\n\n---\n\n")
+}
+```
+
+
+# System Information
+
+```{r system-info, echo=FALSE}
+# Get system information
+sys_info <- Sys.info()
+os_type <- sys_info["sysname"]
+
+# Get OS-specific information
+if (os_type == "Darwin") {
+  # macOS
+  mem_gb <- as.numeric(system("sysctl -n hw.memsize", intern = TRUE)) / (1024^3)
+  chip_name <- system("sysctl -n machdep.cpu.brand_string", intern = TRUE)
+  model_name <- tryCatch({
+    system("system_profiler SPHardwareDataType | grep 'Model Name' | awk -F': ' '{print $2}'", intern = TRUE)
+  }, error = function(e) "Mac")
+  os_name <- system("sw_vers -productName", intern = TRUE)
+  os_version <- system("sw_vers -productVersion", intern = TRUE)
+} else if (os_type == "Linux") {
+  mem_gb <- as.numeric(system("grep MemTotal /proc/meminfo | awk '{print $2}'", intern = TRUE)) / (1024^2)
+  chip_name <- system("lscpu | grep 'Model name' | awk -F': ' '{print $2}'", intern = TRUE)
+  model_name <- "Linux Machine"
+  os_name <- tryCatch({
+    system("lsb_release -d | awk -F':\t' '{print $2}'", intern = TRUE)
+  }, error = function(e) "Linux")
+  os_version <- system("uname -r", intern = TRUE)
+} else if (os_type == "Windows") {
+  mem_gb <- as.numeric(system("wmic ComputerSystem get TotalPhysicalMemory /value | find \"=\"", intern = TRUE)) / (1024^3)
+  chip_name <- system("wmic cpu get name /value | find \"=\"", intern = TRUE)
+  model_name <- "Windows Machine"
+  os_name <- "Windows"
+  os_version <- system("ver", intern = TRUE)
+} else {
+  mem_gb <- NA
+  chip_name <- "Unknown"
+  model_name <- "Unknown"
+  os_name <- "Unknown"
+  os_version <- ""
+}
+```
+
+- **Computer:** `r model_name`
+- **Chip:** `r chip_name`
+- **Memory:** `r round(mem_gb, 0)` GB
+- **OS:** `r os_name` `r os_version`
+
+# Benchmark Session Information
+
+**Benchmark Run Date:** `r if(!is.null(benchmark_date)) format(benchmark_date, "%Y-%m-%d %H:%M:%S %Z") else "Not available"`
+
+## Software Versions
+
+```{r software-versions, echo=FALSE}
+# Get R package versions
+blavaan_version <- tryCatch({
+  as.character(packageVersion("blavaan"))
+}, error = function(e) "Not installed")
+
+# Get Blimp version from output file
+blimp_version <- tryCatch({
+  # Look for blimp output file in assets directory
+  blimp_out_file <- "assets/output.blimp-out"
+  if (file.exists(blimp_out_file)) {
+    # Read first few lines
+    blimp_output <- readLines(blimp_out_file, n = 10)
+    # Version is typically on line 5
+    version_line <- blimp_output[5]
+    # Extract version number pattern (e.g., 3.2.22)
+    version_match <- regmatches(version_line, regexpr("[0-9]+\\.[0-9]+\\.[0-9]+", version_line))
+    if (length(version_match) > 0) {
+      version_match[1]
+    } else {
+      "Unknown"
+    }
+  } else {
+    "Not found"
+  }
+}, error = function(e) "Not found")
+
+# Get Mplus version from an output file if available
+mplus_version <- tryCatch({
+  # Look for any .out file in assets directory
+  out_files <- list.files("assets", pattern = "\\.out$", full.names = TRUE)
+  if (length(out_files) > 0) {
+    # Read first output file
+    mplus_output <- readLines(out_files[1], n = 50)
+    version_line <- grep("Mplus VERSION", mplus_output, value = TRUE)
+    if (length(version_line) > 0) {
+      # Extract version number
+      version_match <- regmatches(version_line[1], regexpr("[0-9]+\\.[0-9]+", version_line[1]))
+      if (length(version_match) > 0) version_match[1] else "Unknown"
+    } else {
+      "Unknown"
+    }
+  } else {
+    "Not found"
+  }
+}, error = function(e) "Not found")
+```
+
+- **Blimp:** `r blimp_version`
+- **blavaan:** `r blavaan_version`
+- **Mplus:** `r mplus_version`
+
+## R Session Information
+
+```{r session-info}
+if (!is.null(benchmark_session_info)) {
+  print(benchmark_session_info)
+} else {
+  cat("Session information not available. Please re-run benchmark.R to capture session info.\n")
+}
+```
+---
+
+**Note:** This report was automatically generated using the `microbenchmark` package with `r n_replications` replications per software package per model.

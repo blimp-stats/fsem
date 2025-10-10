@@ -1,0 +1,29 @@
+
+DATA: 
+  file = data3.dat;
+VARIABLE:  
+  names = l2id y x m_bin;
+  usevariables = y x m_bin;
+  missing = all (-99);
+  cluster =  l2id;
+  between = m_bin;
+  !categorical = m_bin; ! interactions w categorical variables not allowed      
+ANALYSIS:
+! estimator = ml;
+! algorithm = integration; ! WARNING:  THIS MODEL REQUIRES A LARGE AMOUNT OF MEMORY AND DISK SPACE
+  type = twolevel random;
+  estimator = bayes;
+  fbiterations = 20000;
+  bseed = 90291;
+MODEL: 
+  %within%
+  eta | y on x;
+  %between%
+  xb with m_bin;
+  xb by x@1; x@0.01;
+  eta on m_bin;
+  xb_by_m | xb xwith m_bin;
+  y on xb m_bin xb_by_m;
+  eta with y;
+OUTPUT: 
+  tech1 tech8;
