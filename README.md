@@ -1,6 +1,6 @@
 # Factored Structural Equation Modeling in Blimp
 
-This repository contains supplemental material for *Factored Structural Equation Modeling in Blimp*.
+This repository contains supplemental material for [*Factored Structural Equation Modeling in Blimp*](https://osf.io/qrza9).
 
 The folder structure is as follows:
 
