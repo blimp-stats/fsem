@@ -4,14 +4,18 @@ This repository contains supplemental material for [*Factored Structural Equatio
 
 The folder structure is as follows:
 
-- **benchmark**: Blimp speed comparison
-- **data**: Data sets for examples
-- **docs**: Additional online supplmental documents
-- **example**: `rblimp` example
+- **benchmark**: [Blimp speed comparison](benchmark)
+- **data**: [Data sets for examples](data)
+- **docs**: [Additional online supplmental documents](docs)
+- **example**: [`rblimp` example](example)
+
+# Blimp Scripting Language
+
+- See the [quickstart guide](docs/QUICKSTART.md)
 
 # Blimp Installation Guide
 
-Blimp is a standalone software package for Bayesian multilevel structural equation modeling and imputation. It runs as a command-line application across all major operating systems and may also be accessed through **Blimp Studio**, a graphical interface for interactive use, or **rbllimp**, an R interface for Blimp.
+Blimp is a standalone software package for Bayesian multilevel structural equation modeling and imputation. It runs as a command-line application across all major operating systems and may also be accessed through **Blimp Studio**, a graphical interface for interactive use, or **rblimp**, an R interface for Blimp.
 
 ## 1. System Requirements
 
