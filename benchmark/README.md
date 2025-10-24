@@ -6,6 +6,8 @@ This directory contains a reproducible benchmark system for comparing the execut
 - **blavaan** (Bayesian lavaan)
 - **Mplus** (Bayes estimator, via MplusAutomation)
 
+**[View Benchmark Report](benchmark_report.md)**
+
 ## Quick Start
 
 To run the complete benchmark and generate the report:
@@ -17,7 +19,7 @@ source("run_benchmark.R")
 This single command will:
 1. Execute all benchmark analyses (10 runs per software per model)
 2. Save results to `benchmark_results.rds`
-3. Generate an HTML report: `benchmark_report.html`
+3. Generate reports: `benchmark_report.html` and `benchmark_report.md`
 
 ## Models Benchmarked
 
@@ -43,9 +45,10 @@ The benchmark compares **11 structural equation models** that all three software
 
 - **`run_benchmark.R`**: Master script - runs everything with one call
 - **`benchmark.R`**: Main benchmark script using `microbenchmark` package
-- **`benchmark_report.Rmd`**: RMarkdown template for automated report generation
+- **`benchmark_report.Rmd`**: RMarkdown template for automated report generation (produces both HTML and Markdown)
 - **`benchmark_results.rds`**: Output file containing timing data (generated after run)
-- **`benchmark_report.html`**: HTML report with visualizations (generated after run)
+- **`benchmark_report.html`**: HTML report with interactive visualizations (generated after run)
+- **`benchmark_report.md`**: Markdown report for GitHub viewing (generated after run)
 
 ## Requirements
 
@@ -88,7 +91,7 @@ Mplus scripts must be available in `../Analysis Examples/Mplus Scripts/`:
 
 ## Report Contents
 
-The generated HTML report includes:
+The generated reports include:
 - Executive summary with model descriptions
 - Summary statistics (min, Q1, mean, median, Q3, max) for each model × software
 - Speed ratio comparisons (relative to fastest software per model)
@@ -116,9 +119,16 @@ If you prefer to run steps separately:
 source("benchmark.R")
 ```
 
-2. Generate report from existing results:
+2. Generate reports from existing results:
 ```r
-rmarkdown::render("benchmark_report.Rmd")
+# Generate both HTML and Markdown reports
+rmarkdown::render("benchmark_report.Rmd", output_format = "all")
+
+# Or generate only HTML
+rmarkdown::render("benchmark_report.Rmd", output_format = "html_document")
+
+# Or generate only Markdown
+rmarkdown::render("benchmark_report.Rmd", output_format = "md_document")
 ```
 
 ## Notes
