@@ -5,7 +5,8 @@ This repository contains supplemental material for [*Factored Structural Equatio
 The folder structure is as follows:
 
 - **benchmark**: Blimp speed comparison
-- **data**: Data sets for examples.
+- **data**: Data sets for examples
+- **docs**: Additional online supplmental documents
 - **example**: `rblimp` example
 
 # Blimp Installation Guide
