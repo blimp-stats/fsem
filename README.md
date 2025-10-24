@@ -11,7 +11,7 @@ The file structure is as follows:
   - [Install Guide](docs/Install-Guide.pdf)
   - [Extended Model Descriptions](docs/Extended%20Model%20Descriptions.pdf)
   - [Derivation of Latent Variable Predictive Distribution](docs/Derivation%20of%20Latent%20Variable%20Predictive%20Distribution.pdf)
-- **examples**: [`rblimp` examples](examples)
+- **examples**: [`rblimp` and Blimp Studio examples](examples)
   - [FSEM Real Data Analysis](examples/FSEM%20Real%20Data%20Analysis.pdf)
 
 # Blimp Scripting Language
