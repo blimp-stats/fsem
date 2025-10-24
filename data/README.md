@@ -107,6 +107,5 @@ data1 <- read.csv('data/data1.csv')
 ## References
 
 For complete examples and model specifications using these data sets, see:
-- [Example R script](../example/FSEM-Example.R)
-- [Benchmark comparisons](../benchmark/benchmark.R)
 - [Quickstart guide](../docs/QUICKSTART.md)
+- [Example R script](../example/FSEM-Example.R)
