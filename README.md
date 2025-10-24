@@ -8,7 +8,7 @@ The file structure is as follows:
 - **data**: [Data sets for examples](data)
 - **docs**: [Additional online supplemental documents](docs)
   - [Blimp Scripting Quick Start](docs/Blimp%20Scripting%20Quick%20Start.pdf)
-  - [Install Guide](docs/Install-Guide.pdf)
+  - [Install Guide](docs/Blimp%20Install%20Guide.pdf)
   - [Extended Model Descriptions](docs/Extended%20Model%20Descriptions.pdf)
   - [Derivation of Latent Variable Predictive Distribution](docs/Derivation%20of%20Latent%20Variable%20Predictive%20Distribution.pdf)
 - **examples**: [`rblimp` and Blimp Studio examples](examples)
