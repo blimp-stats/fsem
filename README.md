@@ -62,7 +62,7 @@ Offline installers that do not require internet connection are also available fo
 
 ## 3. Installation Instructions
 
-* Note: Blimp Installers version number differs from Blimp's computational engine version number.*
+_Note: Blimp Installers version number differs from Blimp's computational engine version number._
 
 ### macOS
 1. Download the `.dmg` installer for macOS 11.6+ from the Blimp website.
