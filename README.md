@@ -6,8 +6,13 @@ The folder structure is as follows:
 
 - **benchmark**: [Blimp speed comparison](benchmark)
 - **data**: [Data sets for examples](data)
-- **docs**: [Additional online supplmental documents](docs)
-- **example**: [`rblimp` example](example)
+- **docs**: [Additional online supplemental documents](docs)
+  - [Blimp Scripting Quick Start](docs/Blimp%20Scripting%20Quick%20Start.pdf)
+  - [Install Guide](docs/Install-Guide.pdf)
+  - [Extended Model Descriptions](docs/Extended%20Model%20Descriptions.pdf)
+  - [Derivation of Latent Variable Predictive Distribution](docs/Derivation%20of%20Latent%20Variable%20Predictive%20Distribution.pdf)
+- **examples**: [`rblimp` examples](examples)
+  - [FSEM Real Data Analysis](examples/FSEM%20Real%20Data%20Analysis.pdf)
 
 # Blimp Scripting Language
 
