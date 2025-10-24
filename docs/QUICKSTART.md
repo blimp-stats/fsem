@@ -33,33 +33,33 @@ A brief description of several major Blimp commands follows, not all of which ap
 
 ## Command Reference
 
-**`DATA`**: The `DATA` command specifies the input data set, which must be saved as a .csv (comma separated values) format or a whitespace (including tab) delimited file (e.g., .dat or .txt). Blimp accepts only numeric characters for data values (e.g., a nominal variable cannot have alphanumeric labels as score values), although alphanumeric characters (e.g., `NA`, `.`) can be used for missing value codes. Variable names can appear in the column headers, but the `VARIABLES` command (described next) must be omitted. No file path is needed if the Blimp script (the .imp file) is located in the same directory as the data.
+- The `DATA` command specifies the input data set, which must be saved as a .csv (comma separated values) format or a whitespace (including tab) delimited file (e.g., .dat or .txt). Blimp accepts only numeric characters for data values (e.g., a nominal variable cannot have alphanumeric labels as score values), although alphanumeric characters (e.g., `NA`, `.`) can be used for missing value codes. Variable names can appear in the column headers, but the `VARIABLES` command (described next) must be omitted. No file path is needed if the Blimp script (the .imp file) is located in the same directory as the data.
 
-**`VARIABLES`**: The `VARIABLES` command specifies the variable names for the data set listed on the `DATA` command in the input file. This command should not be used if the data file has variable names as column headers. The variable list may include variables that are not used in an analysis.
+- The `VARIABLES` command specifies the variable names for the data set listed on the `DATA` command in the input file. This command should not be used if the data file has variable names as column headers. The variable list may include variables that are not used in an analysis.
 
-**`MISSING`**: The `MISSING` command is used to specify the missing value code. Missing values can be coded with a single numeric (e.g., `999`, `-999`) or alphanumeric value (e.g., `NA`, `.`).
+- The `MISSING` command is used to specify the missing value code. Missing values can be coded with a single numeric (e.g., `999`, `-999`) or alphanumeric value (e.g., `NA`, `.`).
 
-**`ORDINAL`**: The `ORDINAL` command identifies binary or ordinal variables that appear in a `MODEL` statement. By default, Blimp adopts a probit link.
+- The `ORDINAL` command identifies binary or ordinal variables that appear in a `MODEL` statement. By default, Blimp adopts a probit link.
 
-**`NOMINAL`**: The `NOMINAL` command specifies nominal variables that appear in a `MODEL` statement. Nominal variables must be represented as a single variable with numeric codes. Blimp automatically recodes the discrete responses into a set of dummy codes during estimation, where the first (lowest) code is the reference category. By default, Blimp adopts a probit or logit link function depending on whether the variable is an exogeneous predictor or dependent variable.
+- The `NOMINAL` command specifies nominal variables that appear in a `MODEL` statement. Nominal variables must be represented as a single variable with numeric codes. Blimp automatically recodes the discrete responses into a set of dummy codes during estimation, where the first (lowest) code is the reference category. By default, Blimp adopts a probit or logit link function depending on whether the variable is an exogeneous predictor or dependent variable.
 
-**`COUNT`**: The `COUNT` command identifies count variables that appear in a `MODEL` statement. By default, Blimp adopts a negative binomial link function.
+- The `COUNT` command identifies count variables that appear in a `MODEL` statement. By default, Blimp adopts a negative binomial link function.
 
-**`LATENT`**: The `LATENT` command is used to define latent variables (e.g., factors in a measurement model) that will be referenced in the `MODEL` section. Latent variables can be specified at any level of a multilevel model. This specification references cluster-level identifier variables from the `CLUSTERID` line.
+- The `LATENT` command is used to define latent variables (e.g., factors in a measurement model) that will be referenced in the `MODEL` section. Latent variables can be specified at any level of a multilevel model. This specification references cluster-level identifier variables from the `CLUSTERID` line.
 
-**`CLUSTERID`**: The `CLUSTERID` command specifies cluster-level identifier variable(s) needed for a multilevel analysis or multilevel imputation. Two-level analyses require a single identifier for the level-2 sampling unit (cluster), and three-level analyses require level-2 and level-3 identifier variables. The order of the identifier variables does not matter, as Blimp automatically determines variable levels.
+- The `CLUSTERID` command specifies cluster-level identifier variable(s) needed for a multilevel analysis or multilevel imputation. Two-level analyses require a single identifier for the level-2 sampling unit (cluster), and three-level analyses require level-2 and level-3 identifier variables. The order of the identifier variables does not matter, as Blimp automatically determines variable levels.
 
-**`CENTER`**: The `CENTER` command is used to center predictor variables in regression equations. Predictor variables in a multilevel regression model can be centered at the grand means or latent group means.
+- The `CENTER` command is used to center predictor variables in regression equations. Predictor variables in a multilevel regression model can be centered at the grand means or latent group means.
 
-**`MODEL`**: The `MODEL` command typically consists of one or more regression models. Blimp's modeling framework can accommodate a wide range of analyses ranging from basic multiple regression models to complicated multilevel structural equation models with interactions involving latent variables.
+- The `MODEL` command typically consists of one or more regression models. Blimp's modeling framework can accommodate a wide range of analyses ranging from basic multiple regression models to complicated multilevel structural equation models with interactions involving latent variables.
 
-**`SIMPLE`**: The `SIMPLE` command is used to request conditional effects (e.g., simple intercepts and simple slopes) from a regression model with an interaction effect. When using `rblimp`, the `simple_plot()` function can be used to graph simple intercepts and slopes from a model with an interaction, and the `jn_plot()` function produces Johnson-Neyman regions of significance. The `PARAMETERS` command can also be used to compute contrasts.
+- The `SIMPLE` command is used to request conditional effects (e.g., simple intercepts and simple slopes) from a regression model with an interaction effect. When using `rblimp`, the `simple_plot()` function can be used to graph simple intercepts and slopes from a model with an interaction, and the `jn_plot()` function produces Johnson-Neyman regions of significance. The `PARAMETERS` command can also be used to compute contrasts.
 
-**`BURN`**: The `BURN` command specifies the number of burn-in or warm-up iterations. Each MCMC chain (two by default) completes the specified number of iterations before saving estimates for the final parameter summaries.
+- The `BURN` command specifies the number of burn-in or warm-up iterations. Each MCMC chain (two by default) completes the specified number of iterations before saving estimates for the final parameter summaries.
 
-**`ITER`**: The `ITER` command specifies the total number of iterations for the analysis summary tables. The total number of iterations is distributed equally across the number of MCMC chains (the default is two).
+- The `ITER` command specifies the total number of iterations for the analysis summary tables. The total number of iterations is distributed equally across the number of MCMC chains (the default is two).
 
-**`SEED`**: The `SEED` command specifies the random number seed for MCMC estimation. This value must be an integer.
+- The `SEED` command specifies the random number seed for MCMC estimation. This value must be an integer.
 
 ## Using `rblimp`
 
