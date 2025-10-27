@@ -76,14 +76,16 @@ _Note: Blimp Installers version number differs from Blimp's computational engine
 
 
 ### Linux (Ubuntu/RHEL)
-1. Download the appropriate archive for your distribution. Note Blimp Studio is not available for Linux. 
-2. Extract the tarball:
+1. Download the appropriate archive for your distribution. Note Blimp Studio is not available for Linux.
+   
+   _Note: For dyanmic builds it is recommneded to set [OpenBLAS to use a single thread](https://github.com/OpenMathLib/OpenBLAS/wiki/Faq/a15b786986841d2e4e4e84e3f2ecff9c3b263b32#how-can-i-use-openblas-in-multi-threaded-applications)_
+3. Extract the tarball:
    ```bash
    tar -xzf blimp_binary.tar.gz
    ```
-3. Move the executable to a directory in your `$PATH`:
+4. Move the executable to a directory in your `$PATH`:
 
-4. Run Blimp directly from the terminal:
+5. Run Blimp directly from the terminal:
    ```bash
    blimp mymodel.imp
    ```
