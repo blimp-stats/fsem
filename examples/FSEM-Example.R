@@ -975,6 +975,27 @@ model20 <- rblimp(
 )
 output(model20)
 
+## Fit two-part model for semi-continuous outcome
+model20b <- rblimp(
+  data = data1,
+  ordinal = 'u xc1:xc4',
+  nominal = 'm_nom',
+  latent = 'eta',
+  transform = '
+        u = ifelse(y_2pt == min(y_2pt), 0, 1);
+        yr = missing(u == 0, y_2pt);',
+  model = '
+        eta ~ m_nom;
+        eta -> xc1:xc4;
+        xc3 ~~ xc4;
+        yjt(yr - 10) ~ eta m_nom;
+        u ~ eta m_nom;',
+  seed = 90291,
+  burn = 40000,
+  iter = 40000
+)
+output(model20b)
+
 #-------------------------------------------------------------------#
 #### MODEL 21: Random Intercept Cross-Lagged Panel Model ####
 #
