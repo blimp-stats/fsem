@@ -1097,7 +1097,8 @@ output(model21b)
 ## Fit dynamic SEM with lagged predictors
 model22 <- rblimp(
     data = data5,
-    clusterid = 'l2id; timeid: time;',
+    clusterid = 'l2id',
+    timeid = 'time',
     latent = 'l2id = alpha eta',
     model = '
         x ~ intercept@alpha (x.lag - alpha) (y.lag - eta);
