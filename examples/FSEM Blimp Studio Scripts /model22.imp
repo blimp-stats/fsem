@@ -1,0 +1,15 @@
+DATA: data5.csv;
+VARIABLES: l2id time y x;
+MISSING: NA;
+CLUSTERID: l2id;
+TIMEID: time;
+LATENT: l2id = alpha eta;
+MODEL:
+x ~ intercept@alpha (x.lag - alpha) (y.lag - eta);
+y ~ intercept@eta (y.lag - eta) (x.lag - alpha);
+x ~~ y;
+intercept -> alpha eta;
+alpha ~~ eta;
+SEED: 90291;
+BURN: 10000;
+ITER: 10000;

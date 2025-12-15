@@ -1,0 +1,10 @@
+DATA: data3.csv;
+VARIABLES: l2id y x m_bin;
+NOMINAL: m_bin;
+MISSING: NA;
+CLUSTERID: l2id;
+CENTER: groupmean = x;
+MODEL: y ~ x x*m_bin x.mean m_bin x.mean*m_bin | x;
+SEED: 90291;
+BURN: 10000;
+ITER: 10000;

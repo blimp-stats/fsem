@@ -1,0 +1,24 @@
+DATA: data4.csv;
+VARIABLES: x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 z2 z1;
+MISSING: NA;
+LATENT:  alpha eta;
+MODEL:
+# Define Residuals
+x1res = x1 - (mux1 + alpha);
+x2res = x2 - (mux2 + alpha);
+y1res = y1 - (muy1 + eta);
+y2res = y2 - (muy2 + eta);
+# Specify Model
+alpha ~~ eta;
+x1 ~ 1@mux1 alpha@1;
+x2 ~ 1@mux2 alpha@1 x1res y1res;
+x3 ~ 1@mux3 alpha@1 x2res y2res;
+y1 ~ 1@muy1 eta@1;
+y2 ~ 1@muy2 eta@1 y1res x1res;
+y3 ~ 1@muy3 eta@1 y2res x2res;
+x1 ~~ y1;
+x2 ~~ y2;
+x3 ~~ y3;
+SEED: 90291;
+BURN: 10000;
+ITER: 10000;

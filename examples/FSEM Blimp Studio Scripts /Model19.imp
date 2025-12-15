@@ -1,0 +1,17 @@
+DATA: data3.csv;
+VARIABLES: l2id y x m_bin;
+NOMINAL: m_bin;
+MISSING: NA;
+CLUSTERID: l2id;
+LATENT: l2id = alpha eta omega;
+CENTER: groupmean = x;
+MODEL:
+alpha ~ intercept x.mean m_bin x.mean*m_bin;
+eta ~ intercept m_bin;
+omega ~ intercept x.mean m_bin;
+alpha eta omega ~~ alpha eta omega;
+y ~ intercept@alpha x@eta;
+var(y) ~ intercept@omega x;
+SEED: 90291;
+BURN: 10000;
+ITER: 10000;
