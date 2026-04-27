@@ -23,7 +23,7 @@ The guide includes a worked example showing how to specify a latent variable mod
 
 PDF version of the quick start guide with Blimp scripting syntax and command reference.
 
-### [Install-Guide.pdf](Install-Guide.pdf)
+### [Blimp Install Guide.pdf](Blimp%20Install%20Guide.pdf)
 
 Comprehensive installation instructions for Blimp and Blimp Studio across all platforms (macOS, Windows, Linux), including system requirements and troubleshooting.
 
