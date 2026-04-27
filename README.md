@@ -123,12 +123,11 @@ For full argument details, see the *Running From Terminal* section of the [*User
 
 ## 6. Installing `rblimp` (R Interface)
 
-The **rblimp** package provides an R interface to the Blimp engine.
+The **rblimp** package provides an R interface to the Blimp engine and is available on [CRAN](https://cran.r-project.org/web/packages/rblimp/index.html).
 
-### Installation (current version)
+### Installation
 ```r
-install.packages("remotes")
-remotes::install_github("blimp-stats/rblimp")
+install.packages("rblimp")
 ```
 
 > Ensure that Blimp itself is installed and available in your system before loading `rblimp`.
@@ -137,14 +136,24 @@ remotes::install_github("blimp-stats/rblimp")
 - Update Blimp by launching the application (it auto-checks for new releases).  
 - Update `rblimp` in R:
   ```r
-  remotes::update_packages("rblimp")
+  update.packages("rblimp")
   ```
   Check your version with:
   ```r
   packageVersion("rblimp")
   ```
 
-> Once `rblimp` is available on CRAN, these instructions will be updated accordingly.
+### Development Version
+
+To install the latest development version from GitHub:
+```r
+install.packages("remotes")
+remotes::install_github("blimp-stats/rblimp")
+```
+
+### Bug Reports and Issues
+
+Please report bugs or feature requests on the [rblimp GitHub Issues page](https://github.com/blimp-stats/rblimp/issues).
 
 ## 8. Support and Resources
 
