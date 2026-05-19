@@ -1,6 +1,6 @@
 # Blimp and `rblimp` Quick Start Guide
 
-Blimp and `rblimp` are free software tools available at www.appliedmissingdata.com/blimp. A detailed user guide with dozens of analysis examples is available [here](https://docs.google.com/document/d/1D3MS79CakuX9mVVvGH13B5nRd9XLttp69oGsvrIRK64/edit?tab=t.0#heading=h.7vk34wu2mp72). The native graphical interface, Blimp Studio, runs on macOS and Windows, with command-line versions available for Linux. The `rblimp` R package allows researchers to interact with Blimp through R, providing access to R's scripting and visualization capabilities, including plotting functions not available in the graphical interface. Because `rblimp` uses the Blimp computational engine, the native application must be installed before installing the R package. The online materials at https://github.com/blimp-stats/fsem include detailed installation instructions.
+Blimp and `rblimp` are free software tools available at [www.appliedmissingdata.com/blimp](https://www.appliedmissingdata.com/blimp). A detailed user guide with dozens of analysis examples is available [here](https://docs.google.com/document/d/1D3MS79CakuX9mVVvGH13B5nRd9XLttp69oGsvrIRK64/edit?tab=t.0#heading=h.7vk34wu2mp72). The native graphical interface, Blimp Studio, runs on macOS and Windows, with command-line versions available for Linux. The `rblimp` R package allows researchers to interact with Blimp through R, providing access to R's scripting and visualization capabilities, including plotting functions not available in the graphical interface. Although `rblimp` uses the Blimp computational engine, the native application does not need to be installed separately — `rblimp` can download and manage the engine itself via `install_blimp()`. The online materials at [github.com/blimp-stats/fsem](https://github.com/blimp-stats/fsem) include detailed installation instructions.
 
 Model specification uses a simple scripting language that requires no prior knowledge of factored regression or Bayesian estimation. A typical Blimp script consists of several major commands (ending with a colon), each with its own subcommands or keywords (ending with a semicolon). Broadly speaking, most Blimp commands fall into three categories: those that describe variables and their attributes (e.g., `DATA`, `VARIABLES`, `MISSING`, `ORDINAL`, `NOMINAL`, `COUNT`, `LATENT`), define the analysis model (e.g., `CENTER`, `MODEL`, `SIMPLE`, `PARAMETERS`), or control the MCMC algorithm (e.g., `BURN`, `ITER`, `SEED`).
 
@@ -68,7 +68,7 @@ With the exception of variable attributes stored in the R data frame and missing
 ```r
 # Fit model in `rblimp`
 mymodel <- rblimp(
-    data = example          # R data frame
+    data = example,         # R data frame
     ordinal = 'x1:x4',      # define ordinal variables
     nominal = 'm',          # define multicategorical variables
     latent = 'eta',         # define latent variable

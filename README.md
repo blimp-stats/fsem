@@ -22,6 +22,8 @@ The file structure is as follows:
 
 Blimp is a standalone software package for Bayesian multilevel structural equation modeling and imputation. It runs as a command-line application across all major operating systems and may also be accessed through **Blimp Studio**, a graphical interface for interactive use, or **rblimp**, an R interface for Blimp.
 
+> **Using rblimp only?** You can skip Sections 2–5 below. The `rblimp` package can download and manage the Blimp engine for you via `install_blimp()` — see [Section 6](#6-installing-rblimp-r-interface).
+
 ## 1. System Requirements
 
 | Platform  | Supported Versions | Notes |
@@ -125,15 +127,38 @@ For full argument details, see the *Running From Terminal* section of the [*User
 
 The **rblimp** package provides an R interface to the Blimp engine and is available on [CRAN](https://cran.r-project.org/web/packages/rblimp/index.html).
 
-### Installation
+### Step 1: Install the R package
 ```r
 install.packages("rblimp")
 ```
 
-> Ensure that Blimp itself is installed and available in your system before loading `rblimp`.
+### Step 2: Install the Blimp engine
+
+If you do not already have Blimp installed via the system installer (Sections 2–3), `rblimp` can download and manage the engine for you:
+
+```r
+library(rblimp)
+install_blimp()
+```
+
+This installs the latest Blimp engine into a user-writable directory:
+
+- macOS / Linux: `~/.blimp/`
+- Windows: `%LOCALAPPDATA%/Blimp/`
+
+Override the location with the `R_BLIMP_HOME` environment variable. Remove with `uninstall_blimp()`.
+
+If you've already installed Blimp via the system installer, `rblimp` will detect it automatically. To point to a non-standard location:
+
+```r
+detect_blimp()              # automatic detection
+set_blimp("/path/to/blimp") # or set manually
+has_blimp()                 # verify
+```
 
 ### Updating
-- Update Blimp by launching the application (it auto-checks for new releases).  
+- If installed via `install_blimp()`, re-run `install_blimp()` to get the latest engine.
+- If installed via the system installer, launch the application (it auto-checks for new releases).
 - Update `rblimp` in R:
   ```r
   update.packages("rblimp")
